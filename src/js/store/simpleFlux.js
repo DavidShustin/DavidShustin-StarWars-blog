@@ -1,34 +1,11 @@
 const getState = ({ getStore, getActions, setStore }) => {
-	const API_URL = "https://swapi.py4e.com/api/";
-
-    const saveToLocalStorage = (key, data) => {
-        localStorage.setItem(key, JSON.stringify(data))
-    };
-
-    const getFromLocalStorage = (key) => {
-        const data = localStorage.getItem(key);
-        return data ? JSON.parse(data) : [];
-    }
-
-    const fetchDataIfNeeded = (category, apiEndPoint, localStorageKey) => {
-        const store = getStore();
-        if (Array.isArray(store[category]) && store[category].length === 0) {
-            fetch(API_URL + apiEndPoint)
-                .then(resp => resp.json())
-                .then(data => {
-                    setStore({ [category]: data.results})
-                    saveToLocalStorage(localStorageKey, data.results)
-                })
-                .catch(error => console.log(`error fetching ${category}:`, error));
-        }
-    }
+	const API_URL = "https://swapi.py4e.com/api/"
 	return {
 		store: {
-			characters: getFromLocalStorage("characters"),
-			planets: getFromLocalStorage("planets"),
-			favorites: getFromLocalStorage("favorites"),
-			starships: getFromLocalStorage("starships"),
-            // do the same for the rest of the category
+			characters: [],
+			planets: [],
+			favorites: [],
+			starships: [],
 
 			starshipImages: [
 				"https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/f2e0f812-760e-426d-8792-fe53817ccbd3/dc7r0st-a74472ce-8092-401a-ba8c-9635e78cceba.png?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1cm46YXBwOjdlMGQxODg5ODIyNjQzNzNhNWYwZDQxNWVhMGQyNmUwIiwiaXNzIjoidXJuOmFwcDo3ZTBkMTg4OTgyMjY0MzczYTVmMGQ0MTVlYTBkMjZlMCIsIm9iaiI6W1t7InBhdGgiOiJcL2ZcL2YyZTBmODEyLTc2MGUtNDI2ZC04NzkyLWZlNTM4MTdjY2JkM1wvZGM3cjBzdC1hNzQ0NzJjZS04MDkyLTQwMWEtYmE4Yy05NjM1ZTc4Y2NlYmEucG5nIn1dXSwiYXVkIjpbInVybjpzZXJ2aWNlOmZpbGUuZG93bmxvYWQiXX0.gWGLJ7914bUMqMtxru5pQr8oCWUhYhS3vdLrR1eCXP8",
@@ -44,22 +21,53 @@ const getState = ({ getStore, getActions, setStore }) => {
 			],
 		},
 		actions: {
-			getCharacters: () => fetchDataIfNeeded("characters", "people", "characters"),
-			getPlanets: () => fetchDataIfNeeded("planets", "planets", "planets"),
-			getStarShips: () => fetchDataIfNeeded("starships", "starships", "starships"),
-			addFavorites: (favItem) => {
-                const newFavorites = [...getStore().favorites, favItem]
-				setStore({
-					favorites: newFavorites
+			getCharacters: () => {
+				console.log("calling get characters action")
+				fetch(API_URL + "people")
+				.then(resp => {
+					console.log("response before jsonify:", resp);
+					return resp.json();
 				})
-                saveToLocalStorage("favorites", newFavorites)
+				.then(data => {
+					console.log("response after jsonify:", data);
+					setStore({characters: data.results});
+				})
+				.catch(error => console.log(error))
+			},
+			getPlanets: () => {
+				fetch(API_URL + "planets")
+				.then(resp => {
+					console.log("response before jsonify:", resp);
+					return resp.json();
+				})
+				.then(data => {
+					console.log("response after jsonify:", data);
+					setStore({planets: data.results});
+				})
+				.catch(error => console.log(error))
+			},
+			getStarShips: () => {
+				fetch(API_URL + "starships")
+				.then(resp => {
+					console.log("response before jsonify:", resp);
+					return resp.json();
+				})
+				.then(data => {
+					console.log("response after jsonify:", data);
+					setStore({starships: data.results});
+				})
+				.catch(error => console.log(error))
+			},
+			addFavorites: (favItem) => {
+				setStore({
+					favorites: [...getStore().favorites, favItem]
+				})
 			},
 			deleteFavorites: (index) => {
 				const newFavorites = getStore().favorites.filter((_, i) => i !== index);
 				setStore({
 					favorites: newFavorites
 				})
-                saveToLocalStorage("favorites", newFavorites)
 			}
 
 		}
